@@ -16,7 +16,36 @@ def filter_zero_rows(csr):
     csr = csr[keep]
     return(csr, keep)
 
-def bin_sparse_dok(mgf_file=None, mgf_files=None, spectra_watchlist = None, output_file = None, min_bin = 50, max_bin = 2000, bin_size = 0.01, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True):
+def row_filter_intensity(X, bin_names, threshold = 1/100):
+    colsums = np.array(X.sum(axis = 0)).flatten()
+    for i in range(X.shape[1]):
+        X[:, i] = X[:, i]/colsums[i]
+    rowsums = np.array(X.sum(axis = 1)).flatten()
+    rowkeep = rowsums > threshold
+    X = X[rowkeep, :]
+    bin_names = [x for (x, v) in zip(bin_names, rowkeep) if v]
+    return((X, bin_names))
+
+def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True):
+    """ Bins an mgf file 
+
+    Bins an mgf of ms2 spectra and returns a sparse dok matrix. Operates on either a single or a list of mgf files.
+
+    Args:
+    mgf_file: The path of an mgf file.
+    mgf_files: A list of mgf files.
+    output_file = Name of output file in pickle format.
+    min_bin = smallest m/z value to be binned.
+    max_bin = largest m/z value to be binned.
+    bin_size: M/z range in one bin.
+    max_parent_mass: Remove ions larger than this.
+    verbose: Print debug info.
+    remove_zero_sum_rows: Explicitly remove empty rows (bins).
+    remove_zero_sum_cols: Explicitly remove spectra were all values were filtered away (columns)
+
+    returns:
+    A sparse dok matrix X, a list of bin names, and a list of spectra names 
+    """
     start = time.time()
     bins = np.arange(min_bin, max_bin, bin_size)
 
@@ -35,18 +64,13 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, spectra_watchlist = None, outp
         base = os.path.basename(file)
         for spectrum_index, spectrum in enumerate(reader):
             scan_names.append(os.path.splitext(base)[0] + "_" + spectrum['params']['scans'])
-            if spectrum['params']['pepmass'][0] > 850:
+            if spectrum['params']['pepmass'][0] > max_parent_mass:
                 continue
             if len(spectrum['m/z array']) == 0:
                 continue
 
             for mz, intensity in zip(spectrum['m/z array'], spectrum['intensity array']):
                 target_bin = math.floor((mz - min_bin)/bin_size)
-                # if base == "agp3k.mgf":
-                #     intensity *= 2
-                # if spectra_watchlist.all() != None and int(spectrum['params']['scans']) in spectra_watchlist:
-                #     intensity *= 10
-                
                 X[target_bin, spectrum_index] += intensity
 
     X = X.tocsr()
@@ -69,17 +93,6 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, spectra_watchlist = None, outp
         pkl.dump((X, bins, scan_names),open( output_file, "wb"))
     return(X, bins, scan_names)
 
-def row_filter_intensity(X, bin_names, threshold = 1/1000):
-    colsums = np.array(X.sum(axis = 0)).flatten()
-    for i in range(X.shape[1]):
-        X[:, i] = X[:, i]/colsums[i]
-    rowsums = np.array(X.sum(axis = 1)).flatten()
-    rowkeep = rowsums > threshold
-    X = X[rowkeep, :]
-    bin_names = [x for (x, v) in zip(bin_names, rowkeep) if v]
-    return((X, bin_names))
     
-#X, bins, scan_names = bin_sparse_dok("data/nematode_symbionts.mgf", verbose = True, output_file = "nematode_symbionts_matrix.pkl")
-# X, bins, scan_names = bin_sparse_dok("data/agp3k.mgf", verbose = True, output_file = "agp3k.mgf_matrix.pkl")
-#X, bins, scan_names = bin_sparse_dok("data/agp3k.mgf", verbose = True, output_file = "agp3k.mgf_matrix.pkl", remove_zero_sum_cols = True)
+
 
