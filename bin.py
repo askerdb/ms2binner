@@ -26,7 +26,31 @@ def row_filter_intensity(X, bin_names, threshold = 1/100):
     bin_names = [x for (x, v) in zip(bin_names, rowkeep) if v]
     return((X, bin_names))
 
-def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True):
+def filter_slice(mz, intensities, retain = 3):
+    """
+    Retain the top intense peaks
+    """
+    zeroidx = np.flip(np.argsort(intensities))[retain:-1]
+    intensities[zeroidx] = 0
+    return(intensities)
+
+def filter_window(spectra, window_size = 50, retain = 3):
+    mzmax = spectra['m/z array'].max()
+    
+    windows = np.linspace(0, mzmax, int(np.round(mzmax/window_size)))
+    for index, i in enumerate(windows):
+        if index + 1 == len(windows):
+            break
+
+        windowsidx = ( spectra['m/z array'] > windows[index]) & (spectra['m/z array'] < windows[index+1])
+        if np.sum(windowsidx) == 0:
+            continue
+
+        spectra['intensity array'][windowsidx] = filter_slice(spectra['m/z array'][windowsidx], spectra['intensity array'][windowsidx], retain = retain)
+        prev = i
+    return(spectra)
+
+def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True, window_filter = True, filter_window_size = 50, filter_window_retain = 3):
     """ Bins an mgf file 
 
     Bins an mgf of ms2 spectra and returns a sparse dok matrix. Operates on either a single or a list of mgf files.
@@ -68,7 +92,8 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 
                 continue
             if len(spectrum['m/z array']) == 0:
                 continue
-
+            if window_filter:
+                spectrum = filter_window(spectrum, filter_window_size, filter_window_retain)
             for mz, intensity in zip(spectrum['m/z array'], spectrum['intensity array']):
                 target_bin = math.floor((mz - min_bin)/bin_size)
                 X[target_bin, spectrum_index] += intensity
@@ -93,6 +118,6 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 
         pkl.dump((X, bins, scan_names),open( output_file, "wb"))
     return(X, bins, scan_names)
 
-    
+
 
 
