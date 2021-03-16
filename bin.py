@@ -95,6 +95,8 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 
             if window_filter:
                 spectrum = filter_window(spectrum, filter_window_size, filter_window_retain)
             for mz, intensity in zip(spectrum['m/z array'], spectrum['intensity array']):
+                if mz > max_bin:
+                    continue
                 target_bin = math.floor((mz - min_bin)/bin_size)
                 X[target_bin, spectrum_index] += intensity
 
