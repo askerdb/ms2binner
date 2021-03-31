@@ -50,7 +50,7 @@ def filter_window(spectra, window_size = 50, retain = 3):
         prev = i
     return(spectra)
 
-def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True, window_filter = True, filter_window_size = 50, filter_window_retain = 3):
+def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True, window_filter = True, filter_window_size = 50, filter_window_retain = 3, filter_parent_peak = True):
     """ Bins an mgf file 
 
     Bins an mgf of ms2 spectra and returns a sparse dok matrix. Operates on either a single or a list of mgf files.
@@ -66,7 +66,7 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 
     verbose: Print debug info.
     remove_zero_sum_rows: Explicitly remove empty rows (bins).
     remove_zero_sum_cols: Explicitly remove spectra were all values were filtered away (columns)
-
+    filter_parent_peak: Remove all ms2 peaks larger than the parent mass
     returns:
     A sparse dok matrix X, a list of bin names, and a list of spectra names 
     """
@@ -95,7 +95,7 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 
             if window_filter:
                 spectrum = filter_window(spectrum, filter_window_size, filter_window_retain)
             for mz, intensity in zip(spectrum['m/z array'], spectrum['intensity array']):
-                if mz > max_bin:
+                if mz > max_bin or mz > spectrum['params']['pepmass'][0]:
                     continue
                 target_bin = math.floor((mz - min_bin)/bin_size)
                 X[target_bin, spectrum_index] += intensity
