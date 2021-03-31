@@ -98,7 +98,7 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 
                 if mz > max_bin or mz > spectrum['params']['pepmass'][0]:
                     continue
                 target_bin = math.floor((mz - min_bin)/bin_size)
-                X[target_bin, spectrum_index] += intensity
+                X[target_bin-1, spectrum_index] += intensity
 
     X = X.tocsr()
     X_orig_shape = X.shape
