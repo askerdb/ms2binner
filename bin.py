@@ -50,14 +50,33 @@ def filter_window(spectra, window_size = 50, retain = 3):
         prev = i
     return(spectra)
 
-def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True, window_filter = True, filter_window_size = 50, filter_window_retain = 3, filter_parent_peak = True):
+def bin_sparse_csr(X, file, scan_names, bins, max_parent_mass = 850, window_filter=True, filter_window_size=50, filter_window_retain=3):
+    min_bin = min(bins)
+    max_bin = max(bins)
+    bin_size = (max_bin - min_bin) / len(bins)
+    reader = mgf.MGF(file)
+    base = os.path.basename(file)
+    for spectrum_index, spectrum in enumerate(reader):
+        scan_names.append(os.path.splitext(base)[0] + "_" + spectrum['params']['scans'])
+        if spectrum['params']['pepmass'][0] > max_parent_mass:
+            continue
+        if len(spectrum['m/z array']) == 0:
+            continue
+        if window_filter:
+            spectrum = filter_window(spectrum, filter_window_size, filter_window_retain)
+        for mz, intensity in zip(spectrum['m/z array'], spectrum['intensity array']):
+            if mz > max_bin or mz > spectrum['params']['pepmass'][0]:
+                continue
+            target_bin = math.floor((mz - min_bin)/bin_size)
+            X[target_bin-1, spectrum_index] += intensity
+
+def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True, window_filter = True, filter_window_size = 50, filter_window_retain = 3, filter_parent_peak = True):
     """ Bins an mgf file 
 
-    Bins an mgf of ms2 spectra and returns a sparse dok matrix. Operates on either a single or a list of mgf files.
+    Bins an mgf of ms2 spectra and returns a sparse CSR matrix. Operates on either a single or a list of mgf files.
 
     Args:
-    mgf_file: The path of an mgf file.
-    mgf_files: A list of mgf files.
+    mgf_files: The path of an mgf file, or a list of multiple mgf files.
     output_file = Name of output file in pickle format.
     min_bin = smallest m/z value to be binned.
     max_bin = largest m/z value to be binned.
@@ -65,16 +84,16 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 
     max_parent_mass: Remove ions larger than this.
     verbose: Print debug info.
     remove_zero_sum_rows: Explicitly remove empty rows (bins).
-    remove_zero_sum_cols: Explicitly remove spectra were all values were filtered away (columns)
+    remove_zero_sum_cols: Explicitly remove spectra where all values were filtered away (columns)
     filter_parent_peak: Remove all ms2 peaks larger than the parent mass
     returns:
-    A sparse dok matrix X, a list of bin names, and a list of spectra names 
+    A sparse CSR matrix X, a list of bin names, and a list of spectra names 
     """
     start = time.time()
     bins = np.arange(min_bin, max_bin, bin_size)
 
-    if mgf_file != None:
-        mgf_files = [mgf_file]
+    if type(mgf_files) != list:
+        mgf_files = [mgf_files]
     
     n_scans = 0
     for file in mgf_files:
@@ -84,24 +103,11 @@ def bin_sparse_dok(mgf_file=None, mgf_files=None, output_file = None, min_bin = 
     X = dok_matrix((len(bins), n_scans), dtype=np.float32)
     scan_names = []
     for file in mgf_files:
-        reader = mgf.MGF(file)
-        base = os.path.basename(file)
-        for spectrum_index, spectrum in enumerate(reader):
-            scan_names.append(os.path.splitext(base)[0] + "_" + spectrum['params']['scans'])
-            if spectrum['params']['pepmass'][0] > max_parent_mass:
-                continue
-            if len(spectrum['m/z array']) == 0:
-                continue
-            if window_filter:
-                spectrum = filter_window(spectrum, filter_window_size, filter_window_retain)
-            for mz, intensity in zip(spectrum['m/z array'], spectrum['intensity array']):
-                if mz > max_bin or mz > spectrum['params']['pepmass'][0]:
-                    continue
-                target_bin = math.floor((mz - min_bin)/bin_size)
-                X[target_bin-1, spectrum_index] += intensity
+        bin_sparse_csr(X, file, scan_names, bins, max_parent_mass, window_filter, filter_window_size, filter_window_retain)
 
     X = X.tocsr()
     X_orig_shape = X.shape
+
     if remove_zero_sum_rows:
         print(X.shape)
         X, row_names_filter = filter_zero_rows(X)
