@@ -18,11 +18,12 @@ import time
 import pickle as pkl
 import os
 
-def filter_zero_cols(csr):
+def filter_zero_cols(csr, threshold=1e-20):
     """ Removes all columns that only contain zeroes
 
     Args:
     csr: Input CSR matrix to filter
+    threshold: Threshold for summed cols to be bigger than, default is 1e-20
 
     Returns:
     A sparse CSR matrix with zero-sum columns filtered out and a boolean array 
@@ -30,17 +31,18 @@ def filter_zero_cols(csr):
     """
     # Sums each column and creates a boolean array of whether each 
     # summed column is greater than 0
-    keep = np.array(csr.sum(axis = 0) > 0).flatten()
+    keep = np.array(csr.sum(axis = 0) > threshold).flatten()
     # Only keeps columns that have a corresponding True value in keep
     csr = csr[:,keep]
 
     return(csr, keep)
 
-def filter_zero_rows(csr):
+def filter_zero_rows(csr, threshold=1e-20):
     """ Removes all rows that only contain zeroes
 
     Args:
     csr: Input CSR matrix to filter
+    threshold: Threshold for summed rows to be bigger than, default is 1e-20
 
     Returns:
     A sparse CSR matrix that has all zero-sum rows filtered out and a boolean
@@ -49,7 +51,7 @@ def filter_zero_rows(csr):
 
     # Sums each row and creates a boolean array of whether each 
     # summed row is greater than 0
-    keep = np.array(csr.sum(axis = 1) > 0).flatten()
+    keep = np.array(csr.sum(axis = 1) > threshold).flatten()
     # Only keeps rows that have a corresponding True value in keep
     csr = csr[keep]
 
