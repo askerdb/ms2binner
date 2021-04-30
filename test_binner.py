@@ -90,3 +90,17 @@ def test_window_filtering():
         assert np.isclose(V['m/z array'],np.array([8.66001000e+02,5.43000000e+02, 0.00000000e+00, 4.34000400e+02,1.24000050e+02, 8.50040000e+01, 5.40000050e+01, 7.00000000e+01,0.00000000e+00, 2.34060000e+02, 6.46230000e+02, 3.44400000e+02,5.00000000e-01, 5.09000001e+02, 4.50000000e+02, 1.56520000e+02,1.87000000e+02, 2.67340000e+02, 3.65223000e+02, 4.87000000e+02,5.89530000e+02])).all()
         assert np.isclose(V['intensity array'],np.array([61,930,1200,0,170,280,0,0,80,0,0,790,0,0,0,0,0,52000,0,8300,0])).all()
 
+"""
+Test binning a single and multiple mgf files (inherently tests bin_sparse as well)
+"""
+def test_bin_mgf_single():
+        V = bin.bin_mgf("test/spectra.mgf")
+        assert np.isclose(V[0].toarray(), np.array([[9.3e+02],[1.2e+03],[2.8e+02],[5.0e+01],[7.9e+02],[5.2e+04]])).all()
+        assert np.isclose(V[1], np.array([83.06999999999343, 84.06999999999323, 97.08999999999062, 140.12999999998206, 238.23999999996255, 256.24999999995896])).all()
+        assert V[2] == ['spectra_7']
+
+def test_bin_mgf_multiple():
+        V = bin.bin_mgf(["test/spectra.mgf", "test/spectra.mgf"])
+        assert np.isclose(V[0].toarray(), np.array([[1.86e+03],[2.40e+03],[5.60e+02],[1.00e+02],[1.58e+03],[1.04e+05]])).all()
+        assert np.isclose(V[1], np.array([83.06999999999343, 84.06999999999323, 97.08999999999062, 140.12999999998206, 238.23999999996255, 256.24999999995896])).all()
+        assert V[2] == ['spectra_7']
