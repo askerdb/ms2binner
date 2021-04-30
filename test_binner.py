@@ -58,3 +58,13 @@ def test_filter_zero_rows_1row_float():
         assert np.isclose(V[0].toarray(),scipy.sparse.csr_matrix(np.array([[.001,0,0,.0004,.00005],[.004,.000005,0,0,.06],[0,.4,0,.0000008,0]])).toarray()).all()
         assert V[1].all() == np.array([True, True, False, True, True]).all()
 
+"""
+Unit tests for filtering slices
+"""
+def test_filter_slice_ret3():
+        M = np.array([4,5,6,2,5,8,73,1])
+        assert np.isclose(bin.filter_slice(M), np.array([0,0,6,0,0,8,73,0])).all()
+
+def test_filter_slice_ret0():
+        M = np.array([4,5,6,2,5,8,73,1])
+        assert np.isclose(bin.filter_slice(M,0), np.array([0,0,0,0,0,0,0,0])).all()
