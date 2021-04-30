@@ -3,7 +3,7 @@ import scipy.sparse
 import numpy as np
 
 """
-4 unit tests for test_filter_zero_cols() with filtering 1, 4, and 0 columns, and
+Unit tests for test_filter_zero_cols() with filtering 1, 4, and 0 columns, and
 then filtering 1 column, but with floats as the values in the matrix
 """
 def test_filter_zero_cols_1col():
@@ -31,7 +31,7 @@ def test_filter_zero_cols_1col_float():
         assert V[1].all() == np.array([True, True, False, True, True]).all()
 
 """
-4 unit tests for test_filter_zero_rows() with filtering 1, 4, and 0 rows, and
+Unit tests for test_filter_zero_rows() with filtering 1, 4, and 0 rows, and
 then filtering 1 row, but with floats as the values in the matrix
 """
 def test_filter_zero_rows_1row():
@@ -59,7 +59,17 @@ def test_filter_zero_rows_1row_float():
         assert V[1].all() == np.array([True, True, False, True, True]).all()
 
 """
-Unit tests for filtering slices
+Unit test for filtering rows and keeping bins
+"""
+def test_row_filter_intensity():
+        M = np.array([[.001,0,0,.0004,.00005,],[.004,.000005,0,0,.06],[1e-20,0,0,0,0],[0,.4,0.5,.0000008,0]])
+        b = np.array(['bin1', 'bin2', 'bin3', 'bin4', 'bin5'])
+        V = bin.row_filter_intensity(M,b)
+        assert np.isclose(V[0], np.array([[2.00000000e-01, 0.00000000e+00, 0.00000000e+00, 9.98003992e-01, 8.32639467e-04],[8.00000000e-01, 1.24998438e-05, 0.00000000e+00, 0.00000000e+00,9.99167361e-01],[0.00000000e+00, 9.99987500e-01, 1.00000000e+00, 1.99600798e-03,0.00000000e+00]])).all()
+        assert V[1] == ['bin1', 'bin2', 'bin4']
+
+"""
+Unit tests for filtering slices, testing keeping the 3 highest values and 0 values
 """
 def test_filter_slice_ret3():
         M = np.array([4,5,6,2,5,8,73,1])
