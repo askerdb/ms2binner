@@ -166,7 +166,7 @@ def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, window_filter=T
     # Get min and max bins
     min_bin = min(bins)
     max_bin = max(bins)
-    # Determine bin size from this
+    # Determine bin size from bins array
     bin_size = (max_bin - min_bin) / len(bins)
     # Parse MGF file
     reader = mgf.MGF(file)
