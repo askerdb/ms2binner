@@ -61,7 +61,7 @@ def row_filter_intensity(X, bin_names, threshold = 1/100):
     """ Filters the rows of an intensity (bins x spectra) matrix based on the given threshold
     
     Args:
-    X: Numpy or Scipy matrix with bins as the rows and spectra as the columns
+    X: Numpy or Scipy matrix with bins as the rows and spectra as the columns. Columns are expected to not sum to zero
     bin_names: Array of bins that corresponds to the rows of X
     threshold: Value to filter based off
 
