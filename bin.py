@@ -102,7 +102,7 @@ def filter_slice(intensities, retain = 3):
     # Sorts the indicies by intensity value, high to low
     # Removes "retain" amount of indices from the front to indicate the largest
     # intensities
-    zeroidx = np.flip(np.argsort(intensities))[retain:-1]
+    zeroidx = np.flip(np.argsort(intensities))[retain:]
     # Zeroes all the indices except the ones that were removed above
     intensities[zeroidx] = 0
 
