@@ -3,7 +3,7 @@ import numpy as np
 import nimfa
 import sys
 import matplotlib
-matplotlib.use('Agg') #for plotting w/out GUI on server
+# matplotlib.use('Agg') #for plotting w/out GUI on server
 import matplotlib.pyplot as plt
 
 mgf_data = sys.path[0] + "agp3k.mgf"
@@ -18,3 +18,4 @@ W = model.fit.W
 W_norm = (W/W.max()).toarray()
 
 plt.scatter(np.repeat(bins, W_norm.shape[1]), W_norm.flat)
+plt.show()
