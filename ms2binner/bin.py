@@ -144,7 +144,7 @@ def filter_window(spectra, window_size = 50, retain = 3):
 
     return(spectra)
 
-def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, window_filter=True, filter_window_size=50, filter_window_retain=3):
+def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, verbose=False, window_filter=True, filter_window_size=50, filter_window_retain=3):
     """ Parses and bins a single MGF file into a matrix that holds the charge intensities of all the spectra
 
     Args:
@@ -172,6 +172,8 @@ def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, window_filter=T
     reader = mgf.MGF(file)
     # File's name without extension is used for creating scan names
     base = os.path.basename(file)
+
+    print("Binning " + file) if verbose else None
 
     # Go through all the spectra from the MGF file
     for spectrum_index, spectrum in enumerate(reader):
@@ -203,6 +205,8 @@ def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, window_filter=T
     # Normalize the matrix, making each bin relative to its max value
     for idx in range(0, X.shape[0]):
         X[idx] = X[idx]/X[idx].toarray().max()
+
+    print("Finished Binning " + file) if verbose else None
     
     return (X,scan_names)
 
@@ -213,7 +217,7 @@ def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_
     The CSR matrix has bins on the rows and spectra as the columns
 
     Args:
-    mgf_files: The path of an mgf file, or a list of multiple mgf files.
+    mgf_files: The path of an mgf file, or a list of multiple mgf files. Can be a directory path containing mgf files
     output_file: Name of output file in pickle format.
     min_bin: smallest m/z value to be binned.
     max_bin: largest m/z value to be binned.
@@ -231,8 +235,20 @@ def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_
     # Creates a list of bins based on the parameters inputted
     bins = np.arange(min_bin, max_bin, bin_size)
 
+    # If the path passed in is a directory then loop through it
+    if os.path.isdir(mgf_files):
+        dir = mgf_files
+        mgf_files = []
+        directory = os.fsencode(dir)
+
+        for file in os.listdir(directory):
+            filename = os.fsdecode(file)
+            # only save filenames of .mgf files in the directory
+            if filename.endswith(".mgf"): 
+                mgf_files.append(os.path.join(dir, filename))
+
     # If only one mgf file is passed in, make it a list so that it's iterable
-    if type(mgf_files) != list:
+    elif type(mgf_files) != list:
         mgf_files = [mgf_files]
     
     n_scans = 0
@@ -247,13 +263,14 @@ def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_
     X = dok_matrix((len(bins), n_scans), dtype=np.float32)
     # Go through each file and bin each MGF file
     for file in mgf_files:
-        X,scan_names = bin_sparse(X, file, scan_names, bins, max_parent_mass, window_filter, filter_window_size, filter_window_retain)
+        X,scan_names = bin_sparse(X, file, scan_names, bins, max_parent_mass, verbose, window_filter, filter_window_size, filter_window_retain)
 
     # Convert from DOK to CSR for easier processing/handling
     X = X.tocsr()
     X_orig_shape = X.shape
 
     # Filter out rows summing to zero if specified
+    print("\nSummary:") if verbose else None
     if remove_zero_sum_rows:
         X, row_names_filter = filter_zero_rows(X)
         # Adjust the bins accordingly based on row_names_filter which says which rows to keep
@@ -274,6 +291,7 @@ def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_
     if output_file is not None:
         # Use pickle to create a binary file that holds the intensity matrix, bins, and spectra names
         pkl.dump((X, bins, scan_names),open( output_file, "wb"))
+        print("Wrote data to " + output_file) if verbose else None
     return(X, bins, scan_names)
 
 
