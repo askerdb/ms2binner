@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to MS2Binner’s documentation! &#8212; MS2Binner  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-ms2binner-s-documentation">
+<h1>Welcome to MS2Binner’s documentation!<a class="headerlink" href="#welcome-to-ms2binner-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-ms2binner.bin"></span><p>Authors: Asker Brejnrod &amp; Arjun Sampath</p>
+<p>This file contains useful methods for binning ms2 spectra along with filtering out noise from
+the resultant intensity matrix</p>
+<dl class="simple">
+<dt>Notable libraries used are:</dt><dd><ul class="simple">
+<li><p>pyteomics: <a class="reference external" href="https://pyteomics.readthedocs.io/en/latest/">https://pyteomics.readthedocs.io/en/latest/</a></p></li>
+<li><p>numpy: <a class="reference external" href="https://numpy.org/doc/stable/">https://numpy.org/doc/stable/</a></p></li>
+<li><p>scipy: <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/">https://docs.scipy.org/doc/scipy/reference/</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py function">
+<dt id="ms2binner.bin.bin_mgf">
+<code class="sig-prename descclassname">ms2binner.bin.</code><code class="sig-name descname">bin_mgf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mgf_files</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">min_bin</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_bin</span><span class="o">=</span><span class="default_value">850</span></em>, <em class="sig-param"><span class="n">bin_size</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">max_parent_mass</span><span class="o">=</span><span class="default_value">850</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">remove_zero_sum_rows</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">remove_zero_sum_cols</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">window_filter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">filter_window_size</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">filter_window_retain</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">filter_parent_peak</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ms2binner.bin.bin_mgf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bins an mgf file</p>
+<p>Bins an mgf of ms2 spectra and returns a sparse CSR matrix. Operates on either a single or a list of mgf files.
+The CSR matrix has bins on the rows and spectra as the columns</p>
+<p>Args:
+mgf_files: The path of an mgf file, or a list of multiple mgf files.
+output_file: Name of output file in pickle format.
+min_bin: smallest m/z value to be binned.
+max_bin: largest m/z value to be binned.
+bin_size: m/z range in one bin.
+max_parent_mass: Remove ions larger than this.
+verbose: Print debug info.
+remove_zero_sum_rows: Explicitly remove empty rows (bins).
+remove_zero_sum_cols: Explicitly remove spectra where all values were filtered away (columns)
+filter_parent_peak: Remove all ms2 peaks larger than the parent mass</p>
+<p>Returns:
+A sparse CSR matrix X, a list of bin names, and a list of spectra names</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ms2binner.bin.bin_sparse">
+<code class="sig-prename descclassname">ms2binner.bin.</code><code class="sig-name descname">bin_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">scan_names</span></em>, <em class="sig-param"><span class="n">bins</span></em>, <em class="sig-param"><span class="n">max_parent_mass</span><span class="o">=</span><span class="default_value">850</span></em>, <em class="sig-param"><span class="n">window_filter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">filter_window_size</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">filter_window_retain</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ms2binner.bin.bin_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses and bins a single MGF file into a matrix that holds the charge intensities of all the spectra</p>
+<p>Args:
+X: Scipy sparse matrix in the format of bins on the rows and spectra on the columns
+file: MGF file to read spectra in from
+scan_names: List of spectra names to append to
+bins: Numpy array of a list of bins for holding spectra charges
+max_parent_mass: Threshold value for max mass of the spectra for filtering
+window_filter: Boolean for whether to use a window filter to remove small intensity peaks
+filter_window_size: Size of each window for the window filter
+filter_window_retain: Number of peaks to keep for the window filter</p>
+<p>Returns:
+A tuple containing a Scipy sparse matrix that has all the charges’ intensities binned and related
+to their corresponding spectra, along with a list of scan names that indicate the mgf file and spectra
+number corresponding to each column of the intensity matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ms2binner.bin.filter_slice">
+<code class="sig-prename descclassname">ms2binner.bin.</code><code class="sig-name descname">filter_slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">intensities</span></em>, <em class="sig-param"><span class="n">retain</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ms2binner.bin.filter_slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters a “slice” of a spectra by maintaining the most intense peaks</p>
+<p>Args:
+intensities: Slice of a spectra’s intensity array
+retain: Number of the largest intensities to keep from the spectra</p>
+<p>Returns:
+Intensity slice from the spectra with only the largest peaks remaining and 
+the rest zeroed out</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ms2binner.bin.filter_window">
+<code class="sig-prename descclassname">ms2binner.bin.</code><code class="sig-name descname">filter_window</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">spectra</span></em>, <em class="sig-param"><span class="n">window_size</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">retain</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ms2binner.bin.filter_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters a single spectra by removing smaller intensities in defined m/z windows</p>
+<p>Args:
+spectra: spectra to be filtered
+window_size: approximately how big each window should be - not exact because of</p>
+<blockquote>
+<div><p>spectra having decimal values, so it’ll get rounded</p>
+</div></blockquote>
+<p>retain: number of intensities to keep for each window</p>
+<p>Returns:
+A filtered version of the spectra passed in</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ms2binner.bin.filter_zero_cols">
+<code class="sig-prename descclassname">ms2binner.bin.</code><code class="sig-name descname">filter_zero_cols</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">csr</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">1e-20</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ms2binner.bin.filter_zero_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all columns that only contain zeroes</p>
+<p>Args:
+csr: Input CSR matrix to filter
+threshold: Threshold for summed cols to be bigger than, default is 1e-20</p>
+<p>Returns:
+A sparse CSR matrix with zero-sum columns filtered out and a boolean array 
+indicating whether to “keep” each column</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ms2binner.bin.filter_zero_rows">
+<code class="sig-prename descclassname">ms2binner.bin.</code><code class="sig-name descname">filter_zero_rows</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">csr</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">1e-20</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ms2binner.bin.filter_zero_rows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all rows that only contain zeroes</p>
+<p>Args:
+csr: Input CSR matrix to filter
+threshold: Threshold for summed rows to be bigger than, default is 1e-20</p>
+<p>Returns:
+A sparse CSR matrix that has all zero-sum rows filtered out and a boolean
+array indicating whether to “keep” each row</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ms2binner.bin.row_filter_intensity">
+<code class="sig-prename descclassname">ms2binner.bin.</code><code class="sig-name descname">row_filter_intensity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">bin_names</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">0.01</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ms2binner.bin.row_filter_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters the rows of an intensity (bins x spectra) matrix based on the given threshold</p>
+<p>Args:
+X: Numpy or Scipy matrix with bins as the rows and spectra as the columns. Columns are expected to not sum to zero
+bin_names: Array of bins that corresponds to the rows of X
+threshold: Value to filter based off</p>
+<p>Returns:
+Returns a tuple with the filtered X matrix and the array of filtered bins</p>
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">MS2Binner</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Asker Brejnrod & Arjun Sampath.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
