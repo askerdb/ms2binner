@@ -1,51 +1,75 @@
 import bin
 import numpy as np
+import pandas as pd
 import nimfa
 import sys
 import matplotlib
-import matplotlib.patches as mpatches
-# matplotlib.use('Agg') #for plotting w/out GUI on server
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 def softmax(x):
     """Compute softmax values for each sets of scores in x."""
     return np.exp(x) / np.sum(np.exp(x), axis=0)
 
-mgf_data = sys.path[0] + "/agp3k.mgf"
-bin_size = 0.01
-rank = 10
+def savePlot(filename, filetype='png'):
+    """ Saves plot as to the inputted file
+    
+    Args:
+    filename: File to save plot to
+    filetype: File type to save plot as (default png)
+    """
+    plt.savefig(filename + "." + filetype, dpi=300, format=filetype)
+    print("Plot saved to " + filename + "." + filetype)
 
-input_data, bins, scan_names = bin.bin_mgf(mgf_data, verbose = True, bin_size = bin_size)
-nmf_model = nimfa.Nmf(input_data, rank=rank)
-model = nmf_model()
+def close_windows(event):
+    """Key listener function used to close all plt windows on escape"""
+    if event.key == 'escape':
+        plt.close('all')
 
-# W = model.fit.W
-# W_norm = []
-# for x in W:
-#         W_norm.append(softmax(x.toarray()[0]))
+def plot_ms2data(binned_ms2data, num_components=10, output_file=None, headless=False):
+    """ Plots binned ms2spectra data
 
-# W_norm = np.array(W_norm)
+    Takes binned ms2spectra and breaks it up into the specified number of components
+    using a Non-Negative Matrix Factorization algorithm (NMF). It uses a softmax to
+    normalize each component, and plots all the spectra intensities by component
 
-H = model.fit.H
-H_norm = []
-for x in H:
-        H_norm.append(softmax(x.toarray()[0]))
+    Args:
+    binned_ms2data: Binned matrix of ms2spectra
+    num_components: Number of components to split the spectra into
+    output_file: File to save the plot to
+    headless: Whether to show the plot or not for cases of plotting on a server without a GUI
 
-H_norm = np.array(H_norm)
+    Returns:
+    Matplotlib Axes object that contains the plotted graph data
+    """
+    if headless:
+        matplotlib.use('Agg') #for plotting w/out GUI on servers
+    
+    nmf_model = nimfa.Nmf(binned_ms2data, rank=num_components)
+    model = nmf_model()
 
-colors = ['#ffd700', '#ff8c00', '#e81123', '#ec008c', '#68217a', "#00188f", '#00bcf2', '#04e912', '#d7a36a', '#000']
-labels = ['Component 1', 'Component 2', 'Component 3', 'Component 4', 'Component 5', 'Component 6', 'Component 7', 'Component 8', 'Component 9', 'Component 10']
-components = np.arange(1,11)
-# repeated_colors = np.tile(colors, H_norm.shape[1])
-repeated_colors = np.repeat(colors, H_norm.shape[1])
-patches = []
-for i in range(0, np.shape(colors)[0]):
-    patches.append(mpatches.Patch(color=colors[i], label=labels[i]))
+    H = model.fit.H
+    H_norm = []
+    for x in H:
+            H_norm.append(softmax(x.toarray()[0]))
 
-# plt.xlim((50,1200))
-# plt.scatter(np.repeat(bins, W_norm.shape[1]), W_norm.flat, s=1, c=repeated_colors)
-plt.scatter(np.repeat(components, H_norm.shape[1]), H_norm.flat, s=1, c=repeated_colors)
-plt.xticks(np.arange(0,18))
-plt.legend(handles=patches, loc='upper right')
+    H_norm = np.array(H_norm).T
 
-plt.show()
+    labels = []
+    for i in np.arange(1, num_components+1):
+        labels.append('Component ' + str(i))
+
+    df = pd.DataFrame(H_norm, columns=labels)
+    ax = sns.stripplot(data=df, size=2.5, jitter=.05)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=55, ha='right')
+    ax.set_ylabel("Normalized M/Z Intesity")
+    plt.tight_layout()
+
+    if output_file != None:
+        savePlot(output_file)
+
+    plt.gcf().canvas.mpl_connect('key_press_event', close_windows) #attaches keylistener to plt figure
+
+    plt.show()
+
+    return ax
