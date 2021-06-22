@@ -1,3 +1,15 @@
+"""
+Authors: Asker Brejnrod & Arjun Sampath
+
+This file contains useful methods for plotting binned ms2 spectra data
+
+Notable libraries used are:
+    - numpy: https://numpy.org/doc/stable/
+    - pandas: https://pandas.pydata.org
+    - seaborn: https://seaborn.pydata.org
+    - matplotlib: https://matplotlib.org 
+"""
+
 import bin
 import numpy as np
 import pandas as pd
