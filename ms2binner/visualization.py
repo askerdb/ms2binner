@@ -9,8 +9,6 @@ Notable libraries used are:
     - seaborn: https://seaborn.pydata.org
     - matplotlib: https://matplotlib.org 
 """
-
-import bin
 import numpy as np
 import pandas as pd
 import nimfa

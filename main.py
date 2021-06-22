@@ -1,5 +1,5 @@
-import bin
-import visualization
+from ms2binner.bin import bin_mgf
+from ms2binner.visualization import plot_ms2data
 import argparse
 
 if __name__ == "__main__":
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         if len(mgf) == 1:
                 mgf = mgf[0]
 
-        data, bins, scans = bin.bin_mgf(mgf_files=mgf, output_file=args.filename, min_bin=args.minbin, max_bin=args.maxbin, bin_size=args.binsize, max_parent_mass=args.maxmass, verbose=args.verbose)
+        data, bins, scans = bin_mgf(mgf_files=mgf, output_file=args.filename, min_bin=args.minbin, max_bin=args.maxbin, bin_size=args.binsize, max_parent_mass=args.maxmass, verbose=args.verbose)
 
         if args.plot:
-                visualization.plot_ms2data(data, num_components=args.components, output_file=args.image, headless=args.headless)
+                plot_ms2data(data, num_components=args.components, output_file=args.image, headless=args.headless)
