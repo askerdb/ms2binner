@@ -12,7 +12,7 @@ if __name__ == "__main__":
         parser.add_argument('-nc', '--components', default=10, type=float, help='number of components to split data into for plotting')
         parser.add_argument('-f', '--filename', default="binned_data.pkl", type=str, help='filepath to output data to a binary file')
         parser.add_argument('-i', '--image', default="spectra_plot", type=str, help='filename to save visualization plot as')
-        parser.add_argument('-hl', '--headless', action='store_true', help='turns on headless mode for plotting')
+        parser.add_argument('-hl', '--headless', action='store_false', help='turns on headless mode for plotting')
         parser.add_argument('-v', '--verbose', action='store_true', help='turns on verbose mode')
         args = parser.parse_args()
 
