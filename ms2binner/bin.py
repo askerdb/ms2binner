@@ -17,6 +17,7 @@ import math
 import time
 import pickle as pkl
 import os
+import glob
 
 def filter_zero_cols(csr, threshold=1e-20):
     """ Removes all columns that only contain zeroes
@@ -240,7 +241,7 @@ def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_
         dir = mgf_files
         mgf_files = []
         directory = os.fsencode(dir)
-
+        
         for file in os.listdir(directory):
             filename = os.fsdecode(file)
             # only save filenames of .mgf files in the directory
@@ -249,7 +250,7 @@ def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_
 
     # If only one mgf file is passed in, make it a list so that it's iterable
     elif type(mgf_files) != list:
-        mgf_files = [mgf_files]
+        mgf_files = glob.glob(mgf_files)
     
     n_scans = 0
     # Go through all the mgf files and see how many spectra are there in total
@@ -285,7 +286,7 @@ def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_
         print("Removed %s cols" % (X_orig_shape[1] - X.shape[1] )) if verbose else None
         
     if verbose:
-            print("Binned in %s seconds with dimensions %sx%s, %s nonzero entries (%s)" % (time.time()-start, X.shape[0], X.shape[1], X.count_nonzero(), X.count_nonzero()/(n_scans*len(bins))))
+            print("Binned in %s seconds with dimensions %sx%s, %s nonzero entries (%s)\n" % (time.time()-start, X.shape[0], X.shape[1], X.count_nonzero(), X.count_nonzero()/(n_scans*len(bins))))
 
     # If an output file is specified, write to it
     if output_file is not None:
