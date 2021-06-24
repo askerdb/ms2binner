@@ -237,7 +237,8 @@ def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_
     bins = np.arange(min_bin, max_bin, bin_size)
 
     # If the path passed in is a directory then loop through it
-    if os.path.isdir(mgf_files):
+    
+    if type(mgf_files) != list and os.path.isdir(mgf_files):
         dir = mgf_files
         mgf_files = []
         directory = os.fsencode(dir)
