@@ -12,7 +12,7 @@ if __name__ == "__main__":
         parser.add_argument('-nc', '--components', default=10, type=float, help='number of components to split data into for plotting')
         parser.add_argument('-f', '--filename', default="binned_data.pkl", type=str, help='filepath to output data to a binary file')
         parser.add_argument('-i', '--image', default="spectra_plot", type=str, help='filename to save visualization plot as')
-        parser.add_argument('-hl', '--headless', action='store_true', help='turns on headless mode for plotting')
+        parser.add_argument('-hl', '--headless', action='store_false', help='turns on headless mode for plotting')
         parser.add_argument('-v', '--verbose', action='store_true', help='turns on verbose mode')
         parser.add_argument('-pl', '--plot', action='store_true', help='plots and saves a visualization of the spectra')
         args = parser.parse_args()
@@ -23,5 +23,9 @@ if __name__ == "__main__":
 
         data, bins, scans = bin_mgf(mgf_files=mgf, output_file=args.filename, min_bin=args.minbin, max_bin=args.maxbin, bin_size=args.binsize, max_parent_mass=args.maxmass, verbose=args.verbose)
 
+<<<<<<< HEAD:ms2binner/main.py
+        visualization.plot_ms2data(data, num_components=args.components, output_file=args.image, headless=args.headless)
+=======
         if args.plot:
                 plot_ms2data(data, num_components=args.components, output_file=args.image, headless=args.headless)
+>>>>>>> 0e687815403cab4025ce97a1994c6b9ede9a3d60:main.py
