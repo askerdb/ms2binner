@@ -23,9 +23,5 @@ if __name__ == "__main__":
 
         data, bins, scans = bin_mgf(mgf_files=mgf, output_file=args.filename, min_bin=args.minbin, max_bin=args.maxbin, bin_size=args.binsize, max_parent_mass=args.maxmass, verbose=args.verbose)
 
-<<<<<<< HEAD:ms2binner/main.py
-        visualization.plot_ms2data(data, num_components=args.components, output_file=args.image, headless=args.headless)
-=======
         if args.plot:
                 plot_ms2data(data, num_components=args.components, output_file=args.image, headless=args.headless)
->>>>>>> 0e687815403cab4025ce97a1994c6b9ede9a3d60:main.py
