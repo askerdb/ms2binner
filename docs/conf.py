@@ -42,7 +42,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
     "sphinx.ext.doctest",
-    "sphinxcontrib.apidoc",
+    "sphinx.ext.apidoc",
     "sphinx.ext.napoleon",
 ]
 
