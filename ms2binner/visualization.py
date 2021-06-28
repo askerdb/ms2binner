@@ -72,7 +72,7 @@ def plot_ms2data(binned_ms2data, num_components=10, output_file=None, headless=F
     df = pd.DataFrame(H_norm, columns=labels)
     ax = sns.stripplot(data=df, size=2.5, jitter=.05)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=55, ha='right')
-    ax.set_ylabel("Normalized M/Z Intesity")
+    ax.set_ylabel(r"$Normalized m/z Intesity$")
     plt.tight_layout()
 
     if output_file != None:
