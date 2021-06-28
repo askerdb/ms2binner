@@ -39,7 +39,8 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
-    "sphinx.ext.doctest"
+    "sphinx.ext.doctest",
+    "sphinxcontrib-apidoc"
 ]
 
 apidoc_module_dir = "../ms2binner"
