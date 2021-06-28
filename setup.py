@@ -18,7 +18,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
-    extras_requires={"dev": ["sphinxcontrib-apidoc",
+    extras_require={"dev": ["sphinxcontrib-apidoc",
 			     "pytest"]
     }
 )
