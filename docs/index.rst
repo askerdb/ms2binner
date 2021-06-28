@@ -10,8 +10,7 @@ Welcome to MS2Binner's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: ms2binner
-   :members:
+   API <api/ms2binner.rst>
 
 Indices and tables
 ==================
