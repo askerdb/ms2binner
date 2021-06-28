@@ -37,13 +37,9 @@ release = '1.0.2'
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.coverage",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
-    "sphinx.ext.todo",
-    "sphinx.ext.doctest",
-    "sphinx.ext.apidoc",
-    "sphinx.ext.napoleon",
+    "sphinx.ext.doctest"
 ]
 
 apidoc_module_dir = "../ms2binner"
