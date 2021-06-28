@@ -20,8 +20,6 @@ import ms2binner
 # import sys
 # sys.path.insert(0, os.path.abspath('../ms2binner'))
 
-
-
 # -- Project information -----------------------------------------------------
 
 project = 'MS2Binner'
@@ -37,7 +35,16 @@ release = '1.0.2'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.coverage",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.todo",
+    "sphinx.ext.doctest",
+    "sphinxcontrib.apidoc",
+    "sphinx.ext.napoleon",
+]
 
 apidoc_module_dir = "../ms2binner"
 apidoc_output_dir = "./api"
@@ -54,7 +61,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '../ms2binner/test']
 
 # -- Options for HTML output -------------------------------------------------
 
