@@ -1,4 +1,4 @@
-import bin
+from ms2binner import bin
 import scipy.sparse
 import numpy as np
 
@@ -94,13 +94,13 @@ def test_window_filtering():
 Test binning a single and multiple mgf files (inherently tests bin_sparse as well)
 """
 def test_bin_mgf_single():
-        V = bin.bin_mgf("test/spectra.mgf")
-        assert np.isclose(V[0].toarray(), np.array([[9.3e+02],[1.2e+03],[2.8e+02],[5.0e+01],[7.9e+02],[5.2e+04]])).all()
+        V = bin.bin_mgf("spectra.mgf")
+        assert np.isclose(V[0].toarray(), np.array([[1],[1],[1],[1],[1],[1]])).all()
         assert np.isclose(V[1], np.array([83.06999999999343, 84.06999999999323, 97.08999999999062, 140.12999999998206, 238.23999999996255, 256.24999999995896])).all()
         assert V[2] == ['spectra_7']
 
 def test_bin_mgf_multiple():
-        V = bin.bin_mgf(["test/spectra.mgf", "test/spectra.mgf"])
-        assert np.isclose(V[0].toarray(), np.array([[1.86e+03],[2.40e+03],[5.60e+02],[1.00e+02],[1.58e+03],[1.04e+05]])).all()
+        V = bin.bin_mgf(["spectra.mgf", "spectra.mgf"])
+        assert np.isclose(V[0].toarray(), np.array([[1],[1],[1],[1],[1],[1]])).all()
         assert np.isclose(V[1], np.array([83.06999999999343, 84.06999999999323, 97.08999999999062, 140.12999999998206, 238.23999999996255, 256.24999999995896])).all()
         assert V[2] == ['spectra_7']
