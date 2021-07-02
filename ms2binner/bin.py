@@ -184,7 +184,6 @@ def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, verbose=False, 
     # Go through all the spectra from the MGF file
     for spectrum_index, spectrum in enumerate(reader):
         if verbose:
-            time.sleep(0.01)
             pbar.update()
 
         # Create the scan name based on the MGF file and the current spectra number
