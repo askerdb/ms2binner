@@ -18,6 +18,7 @@ import time
 import pickle as pkl
 import os
 import glob
+import tqdm
 
 def filter_zero_cols(csr, threshold=1e-20):
     """ Removes all columns that only contain zeroes
@@ -176,6 +177,9 @@ def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, verbose=False, 
 
     print("Binning " + file) if verbose else None
 
+    length = X.shape[1]
+    pbar = tqdm.tqdm(total=length)
+
     # Go through all the spectra from the MGF file
     for spectrum_index, spectrum in enumerate(reader):
         # Create the scan name based on the MGF file and the current spectra number
@@ -202,6 +206,10 @@ def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, verbose=False, 
             # indices start at 0. Does += (adds) so that if any charges from the same spectra
             # fall into the same bin because of larger bin sizes, it "stacks" on top of each other
             X[target_bin-1, spectrum_index] += intensity
+
+            time.sleep(0.01)
+            pbar.update()
+            
 
     # Normalize the matrix, making each bin relative to its max value
     for idx in range(0, X.shape[0]):
