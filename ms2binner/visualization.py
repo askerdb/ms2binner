@@ -12,31 +12,21 @@ Notable libraries used are:
 import numpy as np
 import pandas as pd
 import nimfa
-import sys
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import seaborn as sns
 
 def softmax(x):
     """Compute softmax values for each sets of scores in x."""
     return np.exp(x) / np.sum(np.exp(x), axis=0)
 
-def savePlot(filename, filetype='png'):
-    """ Saves plot as to the inputted file
-    
-    Args:
-    filename: File to save plot to
-    filetype: File type to save plot as (default png)
-    """
-    plt.savefig(filename + "." + filetype, dpi=300, format=filetype)
-    print("Plot saved to " + filename + "." + filetype)
-
 def close_windows(event):
     """Key listener function used to close all plt windows on escape"""
     if event.key == 'escape':
         plt.close('all')
 
-def plot_ms2data(binned_ms2data, num_components=10, output_file=None, headless=False):
+def plot_ms2_components(binned_ms2data, num_components=10, output_file=None, headless=False):
     """ Plots binned ms2spectra data
 
     Takes binned ms2spectra and breaks it up into the specified number of components
@@ -76,10 +66,59 @@ def plot_ms2data(binned_ms2data, num_components=10, output_file=None, headless=F
     plt.tight_layout()
 
     if output_file != None:
-        savePlot(output_file)
+        pdf_file = PdfPages(output_file)
+        pdf_file.savefig()
+        print("Plot saved to " + output_file)
+        pdf_file.close()
 
     plt.gcf().canvas.mpl_connect('key_press_event', close_windows) #attaches keylistener to plt figure
 
     plt.show()
 
     return ax
+
+def plot_ms2_histograms(binned_ms2data, bins, num_components=10, output_file=None, headless=False):
+    if headless:
+        matplotlib.use('Agg') #for plotting w/out GUI on servers
+    
+    nmf_model = nimfa.Nmf(binned_ms2data, rank=num_components)
+    model = nmf_model()
+
+    W = model.fit.W
+    W_norm = []
+    for x in W:
+            W_norm.append(softmax(x.toarray()[0]))
+
+    W_norm = np.array(W_norm).T
+
+    subplots = []
+
+    pdf_file = PdfPages(output_file) if output_file != None else None
+
+    for comp in W_norm:
+        plt.figure()
+        ax = sns.barplot(x=bins, y=comp*100)
+        ax.set_ylabel(r"$Normalized Intesity [%]$")
+        ax.set_xlabel(r"$Binned m/z$")
+        for ind, label in enumerate(ax.get_xticklabels()):
+            if ind % 10 == 0:  # every 10th label is kept
+                label.set_visible(True)
+            else:
+                label.set_visible(False)
+        ax.set_ylim(0,100)
+        plt.tight_layout()
+        subplots.append(ax)
+
+        if pdf_file != None and output_file != None:
+            pdf_file.savefig()
+
+
+    if pdf_file != None and output_file != None:
+        print("Plot saved to " + output_file)
+        pdf_file.close()
+
+    plt.gcf().canvas.mpl_connect('key_press_event', close_windows) #attaches keylistener to plt figure
+
+    plt.show()
+
+    return subplots
