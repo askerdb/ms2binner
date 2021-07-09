@@ -14,6 +14,7 @@ import pandas as pd
 import nimfa
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from matplotlib.backends.backend_pdf import PdfPages
 import seaborn as sns
 
@@ -25,6 +26,7 @@ def close_windows(event):
     """Key listener function used to close all plt windows on escape"""
     if event.key == 'escape':
         plt.close('all')
+    
 
 def plot_ms2_components(binned_ms2data, num_components=10, output_file=None, headless=False):
     """ Plots binned ms2spectra data
@@ -62,7 +64,7 @@ def plot_ms2_components(binned_ms2data, num_components=10, output_file=None, hea
     df = pd.DataFrame(H_norm, columns=labels)
     ax = sns.stripplot(data=df, size=2.5, jitter=.05)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=55, ha='right')
-    ax.set_ylabel(r"$Normalized m/z Intesity$")
+    ax.set_ylabel(r"$Normalized\ m/z\ Intensity$")
     plt.tight_layout()
 
     if output_file != None:
@@ -95,29 +97,32 @@ def plot_ms2_histograms(binned_ms2data, bins, num_components=10, output_file=Non
 
     pdf_file = PdfPages(output_file) if output_file != None else None
 
+    index = 1
     for comp in W_norm:
-        plt.figure()
-        ax = sns.barplot(x=bins, y=comp*100)
-        ax.set_ylabel(r"$Normalized Intesity [%]$")
-        ax.set_xlabel(r"$Binned m/z$")
-        for ind, label in enumerate(ax.get_xticklabels()):
-            if ind % 10 == 0:  # every 10th label is kept
-                label.set_visible(True)
-            else:
-                label.set_visible(False)
+        fig = plt.figure(index)
+        ax = sns.barplot(x=bins, y=comp*100, color='steelblue')
+        ax.xaxis.set_major_locator(ticker.AutoLocator())
+        ax.xaxis.set_minor_locator(ticker.AutoMinorLocator())
+        ax.set_ylabel(r"$Normalized\ Intensity\,[\%]$")
+        ax.set_xlabel(r"$Binned\ m/z$")
         ax.set_ylim(0,100)
+        ax.set_title("Component " + str(index), fontweight="bold")
+        fig.canvas.set_window_title("Component " + str(index))
+        fig.canvas.mpl_connect('key_press_event', close_windows) #attaches keylistener to plt figure
+        ax.grid(True, axis="y", color='black', linestyle=':', linewidth=0.1)
         plt.tight_layout()
         subplots.append(ax)
 
         if pdf_file != None and output_file != None:
             pdf_file.savefig()
 
+        index += 1
+
 
     if pdf_file != None and output_file != None:
         print("Plot saved to " + output_file)
         pdf_file.close()
 
-    plt.gcf().canvas.mpl_connect('key_press_event', close_windows) #attaches keylistener to plt figure
 
     plt.show()
 
