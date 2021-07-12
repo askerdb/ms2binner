@@ -10,7 +10,7 @@ Notable libraries used are:
     - scipy: https://docs.scipy.org/doc/scipy/reference/
 """
 
-from pyteomics import mgf, mzxml
+from pyteomics import mgf
 import numpy as np
 from scipy.sparse import dok_matrix
 import math
