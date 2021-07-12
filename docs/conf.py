@@ -22,7 +22,7 @@ import ms2binner
 
 # -- Project information -----------------------------------------------------
 
-project = 'MS2Binner'
+project = 'ms2binner'
 copyright = '2021, Asker Brejnrod & Arjun Sampath'
 author = 'Asker Brejnrod & Arjun Sampath'
 
@@ -36,22 +36,15 @@ release = '1.0.2'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx.ext.autodoc",
+    "autoapi.extension",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinx.ext.doctest",
-    "sphinxcontrib.napoleon",
-    "sphinxcontrib.apidoc"
+    "sphinxcontrib.napoleon"
 ]
 
-apidoc_module_dir = "../ms2binner"
-apidoc_output_dir = "./api"
-apidoc_separate_modules = True
-apidoc_module_first = True
-autodoc_default_options = {
-    'special-members': '__init__,__call__',
-    'inherited-members': True,
-}
+autoapi_ignore = ['*/test*.py']
+autoapi_dirs = ['../ms2binner']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
