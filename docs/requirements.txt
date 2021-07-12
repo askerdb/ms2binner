@@ -1,3 +1,2 @@
-sphinxcontrib-apidoc
-sphinxcontrib-autoapi
+sphinx-autoapi
 sphinxcontrib-napoleon
