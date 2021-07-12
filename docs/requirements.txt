@@ -1,2 +1,2 @@
 sphinxcontrib-apidoc
-sphinxcontrib-napolean
+sphinxcontrib-napoleon
