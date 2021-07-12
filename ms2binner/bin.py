@@ -24,12 +24,13 @@ def filter_zero_cols(csr, threshold=1e-20):
     """ Removes all columns that only contain zeroes
 
     Args:
-    csr: Input CSR matrix to filter
-    threshold: Threshold for summed cols to be bigger than, default is 1e-20
+        csr: Input CSR matrix to filter
+        threshold: Threshold for summed cols to be bigger than, default is 1e-20
 
     Returns:
-    A sparse CSR matrix with zero-sum columns filtered out and a boolean array 
-    indicating whether to "keep" each column
+        A sparse CSR matrix with zero-sum columns filtered out and a boolean array 
+            indicating whether to "keep" each column
+    
     """
     # Sums each column and creates a boolean array of whether each 
     # summed column is greater than 0
@@ -43,12 +44,13 @@ def filter_zero_rows(csr, threshold=1e-20):
     """ Removes all rows that only contain zeroes
 
     Args:
-    csr: Input CSR matrix to filter
-    threshold: Threshold for summed rows to be bigger than, default is 1e-20
+        csr: Input CSR matrix to filter
+        threshold: Threshold for summed rows to be bigger than, default is 1e-20
 
     Returns:
-    A sparse CSR matrix that has all zero-sum rows filtered out and a boolean
-    array indicating whether to "keep" each row
+        A sparse CSR matrix that has all zero-sum rows filtered out and a boolean
+            array indicating whether to "keep" each row
+    
     """
 
     # Sums each row and creates a boolean array of whether each 
@@ -63,12 +65,13 @@ def row_filter_intensity(X, bin_names, threshold = 1/100):
     """ Filters the rows of an intensity (bins x spectra) matrix based on the given threshold
     
     Args:
-    X: Numpy or Scipy matrix with bins as the rows and spectra as the columns. Columns are expected to not sum to zero
-    bin_names: Array of bins that corresponds to the rows of X
-    threshold: Value to filter based off
+        X: Numpy or Scipy matrix with bins as the rows and spectra as the columns. Columns are expected to not sum to zero
+        bin_names: Array of bins that corresponds to the rows of X
+        threshold: Value to filter based off
 
     Returns:
-    Returns a tuple with the filtered X matrix and the array of filtered bins
+        Returns a tuple with the filtered X matrix and the array of filtered bins
+    
     """
 
     # Sums up all the columns into an array
@@ -93,12 +96,13 @@ def filter_slice(intensities, retain = 3):
     """ Filters a "slice" of a spectra by maintaining the most intense peaks
 
     Args:
-    intensities: Slice of a spectra's intensity array
-    retain: Number of the largest intensities to keep from the spectra
+        intensities: Slice of a spectra's intensity array
+        retain: Number of the largest intensities to keep from the spectra
 
     Returns:
-    Intensity slice from the spectra with only the largest peaks remaining and 
-    the rest zeroed out
+        Intensity slice from the spectra with only the largest peaks remaining and 
+            the rest zeroed out
+    
     """
 
     # Sorts the indicies by intensity value, high to low
@@ -114,13 +118,14 @@ def filter_window(spectra, window_size = 50, retain = 3):
     """ Filters a single spectra by removing smaller intensities in defined m/z windows
 
     Args:
-    spectra: spectra to be filtered
-    window_size: approximately how big each window should be - not exact because of 
+        spectra: spectra to be filtered
+        window_size: approximately how big each window should be - not exact because of 
             spectra having decimal values, so it'll get rounded
-    retain: number of intensities to keep for each window 
+        retain: number of intensities to keep for each window 
 
     Returns:
-    A filtered version of the spectra passed in
+        A filtered version of the spectra passed in
+
     """
     
     mzmax = spectra['m/z array'].max()
@@ -150,19 +155,20 @@ def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, verbose=False, 
     """ Parses and bins a single MGF file into a matrix that holds the charge intensities of all the spectra
 
     Args:
-    X: Scipy sparse matrix in the format of bins on the rows and spectra on the columns
-    file: MGF file to read spectra in from
-    scan_names: List of spectra names to append to
-    bins: Numpy array of a list of bins for holding spectra charges
-    max_parent_mass: Threshold value for max mass of the spectra for filtering
-    window_filter: Boolean for whether to use a window filter to remove small intensity peaks
-    filter_window_size: Size of each window for the window filter
-    filter_window_retain: Number of peaks to keep for the window filter
+        X: Scipy sparse matrix in the format of bins on the rows and spectra on the columns
+        file: MGF file to read spectra in from
+        scan_names: List of spectra names to append to
+        bins: Numpy array of a list of bins for holding spectra charges
+        max_parent_mass: Threshold value for max mass of the spectra for filtering
+        window_filter: Boolean for whether to use a window filter to remove small intensity peaks
+        filter_window_size: Size of each window for the window filter
+        filter_window_retain: Number of peaks to keep for the window filter
 
     Returns:
-    A tuple containing a Scipy sparse matrix that has all the charges' intensities binned and related
-    to their corresponding spectra, along with a list of scan names that indicate the mgf file and spectra
-    number corresponding to each column of the intensity matrix
+        A tuple containing a Scipy sparse matrix that has all the charges' intensities binned and related
+            to their corresponding spectra, along with a list of scan names that indicate the mgf file and spectra
+            number corresponding to each column of the intensity matrix
+    
     """
 
     # Get min and max bins
@@ -229,19 +235,20 @@ def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_
     The CSR matrix has bins on the rows and spectra as the columns
 
     Args:
-    mgf_files: The path of an mgf file, or a list of multiple mgf files. Can be a directory path containing mgf files
-    output_file: Name of output file in pickle format.
-    min_bin: smallest m/z value to be binned.
-    max_bin: largest m/z value to be binned.
-    bin_size: m/z range in one bin.
-    max_parent_mass: Remove ions larger than this.
-    verbose: Print debug info.
-    remove_zero_sum_rows: Explicitly remove empty rows (bins).
-    remove_zero_sum_cols: Explicitly remove spectra where all values were filtered away (columns)
-    filter_parent_peak: Remove all ms2 peaks larger than the parent mass
+        mgf_files: The path of an mgf file, or a list of multiple mgf files. Can be a directory path containing mgf files
+        output_file: Name of output file in pickle format.
+        min_bin: smallest m/z value to be binned.
+        max_bin: largest m/z value to be binned.
+        bin_size: m/z range in one bin.
+        max_parent_mass: Remove ions larger than this.
+        verbose: Print debug info.
+        remove_zero_sum_rows: Explicitly remove empty rows (bins).
+        remove_zero_sum_cols: Explicitly remove spectra where all values were filtered away (columns)
+        filter_parent_peak: Remove all ms2 peaks larger than the parent mass
     
     Returns:
-    A sparse CSR matrix X, a list of bin names, and a list of spectra names 
+        A sparse CSR matrix X, a list of bin names, and a list of spectra names 
+    
     """
     start = time.time()
     # Creates a list of bins based on the parameters inputted
