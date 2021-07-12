@@ -11,9 +11,9 @@ Notable libraries used are:
     - tqdm: https://tqdm.github.io
 """
 
-from pyteomics import mgf
+# from pyteomics import mgf
 import numpy as np
-from scipy.sparse import dok_matrix
+# from scipy.sparse import dok_matrix
 import math
 import time
 import pickle as pkl
