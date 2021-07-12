@@ -8,6 +8,7 @@ Notable libraries used are:
     - pyteomics: https://pyteomics.readthedocs.io/en/latest/
     - numpy: https://numpy.org/doc/stable/
     - scipy: https://docs.scipy.org/doc/scipy/reference/
+    - tqdm: https://tqdm.github.io
 """
 
 from pyteomics import mgf

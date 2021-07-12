@@ -7,7 +7,8 @@ Notable libraries used are:
     - numpy: https://numpy.org/doc/stable/
     - pandas: https://pandas.pydata.org
     - seaborn: https://seaborn.pydata.org
-    - matplotlib: https://matplotlib.org 
+    - matplotlib: https://matplotlib.org
+    - nimfa: https://nimfa.biolab.si
 """
 import numpy as np
 import pandas as pd

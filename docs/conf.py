@@ -72,3 +72,16 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# -- Options for intersphinx extension ----------------------------------------------
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "matplotlib": ("https://matplotlib.org", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "pyteomics": ("https://pyteomics.readthedocs.io/en/latest/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "seaborn": ("https://seaborn.pydata.org/", None),
+    "nimfa": ("https://nimfa.biolab.si", None)
+}
