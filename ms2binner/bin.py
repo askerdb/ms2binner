@@ -9,6 +9,7 @@ Notable libraries used are:
     - numpy: https://numpy.org/doc/stable/
     - scipy: https://docs.scipy.org/doc/scipy/reference/
     - tqdm: https://tqdm.github.io
+    - sqlite3: https://docs.python.org/3/library/sqlite3.html
 """
 
 from pyteomics import mgf
@@ -152,6 +153,78 @@ def filter_window(spectra, window_size = 50, retain = 3):
 
     return(spectra)
 
+def bin_sql(df, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True, window_filter = True, filter_window_size = 50, filter_window_retain = 3, filter_parent_peak = True):
+    start = time.time()
+    bins = np.arange(min_bin, max_bin, bin_size)
+
+    scan_names = []
+    # Create an empty sparse matrix with bins as the rows and spectra as the columns
+    X = dok_matrix((len(bins), n_scans), dtype=np.float32)
+
+    spectra_list = df.to_numpy()
+    base = os.path.basename("sql_db")
+
+    for spectra in spectra_list:
+        idx = spectra[0]
+        pmass = spectra[1]
+        mz = spectra[2]
+        intens = spectra[3]
+        scan_names.append(os.path.splitext(base)[0] + "_" + str(idx))
+        X =  bin_arrays(X, intens, mz, pmass, idx, bins, verbose=verbose)
+
+    # Convert from DOK to CSR for easier processing/handling
+    X = X.tocsr()
+    X_orig_shape = X.shape
+
+    # Filter out rows summing to zero if specified
+    print("\nSummary:") if verbose else None
+    if remove_zero_sum_rows:
+        X, row_names_filter = filter_zero_rows(X)
+        # Adjust the bins accordingly based on row_names_filter which says which rows to keep
+        bins = [x for (x, v) in zip(bins, row_names_filter) if v]
+        print("Removed %s rows" % (X_orig_shape[0] - X.shape[0] )) if verbose else None
+
+    # Filter out columns summing to zero if specified
+    if remove_zero_sum_cols:
+        X, col_names_filter = filter_zero_cols(X)
+        # Adjust the scan names accordingly based on col_names_filter which says which columns to keep
+        scan_names = [x for (x, v) in zip(scan_names, col_names_filter) if v]
+        print("Removed %s cols" % (X_orig_shape[1] - X.shape[1] )) if verbose else None
+        
+    if verbose:
+            print("Binned in %s seconds with dimensions %sx%s, %s nonzero entries (%s)\n" % (time.time()-start, X.shape[0], X.shape[1], X.count_nonzero(), X.count_nonzero()/(n_scans*len(bins))))
+
+    # If an output file is specified, write to it
+    if output_file is not None:
+        # Use pickle to create a binary file that holds the intensity matrix, bins, and spectra names
+        pkl.dump((X, bins, scan_names),open( output_file, "wb"))
+        print("Wrote data to " + output_file) if verbose else None
+    return(X, bins, scan_names)
+
+def bin_arrays(X,intensity_array,mz_array, parent_mass, spectrum_index,bins, max_parent_mass = 850, verbose = False):
+    # Do a basic filter based on the mass of the spectra
+    if parent_mass > max_parent_mass:
+        return
+    # Get min and max bins
+    min_bin = min(bins)
+    max_bin = max(bins)
+    # Determine bin size from bins array
+    bin_size = (max_bin - min_bin) / len(bins)
+    # Loop through all the charges in the spectra and get the corresponding intensities
+    for mz, intensity in zip(spectrum['m/z array'], spectrum['intensity array']):
+        # If the charge is outside of the max bin specified or if it's too large 
+        # relative to the spectra itself, skip it
+        if mz > max_bin or mz > spectrum['params']['pepmass'][0]:
+            continue
+        # Figure out what the index of the bin should be
+        target_bin = math.floor((mz - min_bin)/bin_size)
+        # Add the intensity to the right spot in the matrix. Uses target_bin-1 because
+        # indices start at 0. Does += (adds) so that if any charges from the same spectra
+        # fall into the same bin because of larger bin sizes, it "stacks" on top of each other
+        X[target_bin-1, spectrum_index] += intensity
+
+    return X
+
 def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, verbose=False, window_filter=True, filter_window_size=50, filter_window_retain=3):
     """ Parses and bins a single MGF file into a matrix that holds the charge intensities of all the spectra
 
@@ -188,13 +261,19 @@ def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, verbose=False, 
     if verbose:
         pbar = tqdm.tqdm(total=length, unit='spectra', smoothing=0.1, dynamic_ncols=True)
 
+    half = length/2
+    curr = 1
     # Go through all the spectra from the MGF file
     for spectrum_index, spectrum in enumerate(reader):
         if verbose:
             pbar.update()
-
-        # Create the scan name based on the MGF file and the current spectra number
-        scan_names.append(os.path.splitext(base)[0] + "_" + spectrum['params']['scans'])
+	
+        if curr <= half:
+                # Create the scan name based on the MGF file and the current spectra number
+                scan_names.append(os.path.splitext(base)[0] + "_filtered" + "_" + spectrum['params']['scans'])
+        else:
+                scan_names.append(os.path.splitext(base)[0] + "_" + spectrum['params']['scans'])
+        curr +=1
         # Do a basic filter based on the mass of the spectra
         if spectrum['params']['pepmass'][0] > max_parent_mass:
             continue
@@ -229,7 +308,7 @@ def bin_sparse(X, file, scan_names, bins, max_parent_mass = 850, verbose=False, 
     
     return (X,scan_names)
 
-def bin_mgf(mgf_files=None,output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True, window_filter = True, filter_window_size = 50, filter_window_retain = 3, filter_parent_peak = True):
+def bin_mgf(mgf_files,output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01, max_parent_mass = 850, verbose = False, remove_zero_sum_rows = True, remove_zero_sum_cols = True, window_filter = True, filter_window_size = 50, filter_window_retain = 3, filter_parent_peak = True):
     """ Bins an mgf file 
 
     Bins an mgf of ms2 spectra and returns a sparse CSR matrix. Operates on either a single or a list of mgf files.
