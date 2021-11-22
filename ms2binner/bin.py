@@ -9,7 +9,6 @@ Notable libraries used are:
     - numpy: https://numpy.org/doc/stable/
     - scipy: https://docs.scipy.org/doc/scipy/reference/
     - tqdm: https://tqdm.github.io
-    - sqlite3: https://docs.python.org/3/library/sqlite3.html
 """
 
 from pyteomics import mgf
@@ -21,6 +20,7 @@ import pickle as pkl
 import os
 import glob
 import tqdm
+import json
 
 def filter_zero_cols(csr, threshold=1e-20):
     """ Removes all columns that only contain zeroes
@@ -158,19 +158,17 @@ def bin_sql(df, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01
     bins = np.arange(min_bin, max_bin, bin_size)
 
     scan_names = []
+    n_scans = df.shape[0]
     # Create an empty sparse matrix with bins as the rows and spectra as the columns
     X = dok_matrix((len(bins), n_scans), dtype=np.float32)
 
-    spectra_list = df.to_numpy()
-    base = os.path.basename("sql_db")
-
-    for spectra in spectra_list:
-        idx = spectra[0]
-        pmass = spectra[1]
-        mz = spectra[2]
-        intens = spectra[3]
-        scan_names.append(os.path.splitext(base)[0] + "_" + str(idx))
-        X =  bin_arrays(X, intens, mz, pmass, idx, bins, verbose=verbose)
+    for i in range(0, n_scans):
+        idx = df['Spectrum Index'][i] 
+        pmass = df['parent mass'][i]
+        mz = json.loads(df['m/z array'][i])
+        intens = json.loads(df['intensity array'][i])
+        scan_names.append("sqldb_" + str(idx))
+        X =  bin_arrays(X, intens, mz, pmass, i, bins, verbose=verbose)
 
     # Convert from DOK to CSR for easier processing/handling
     X = X.tocsr()
@@ -204,17 +202,17 @@ def bin_sql(df, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01
 def bin_arrays(X,intensity_array,mz_array, parent_mass, spectrum_index,bins, max_parent_mass = 850, verbose = False):
     # Do a basic filter based on the mass of the spectra
     if parent_mass > max_parent_mass:
-        return
+        return X
     # Get min and max bins
     min_bin = min(bins)
     max_bin = max(bins)
     # Determine bin size from bins array
     bin_size = (max_bin - min_bin) / len(bins)
     # Loop through all the charges in the spectra and get the corresponding intensities
-    for mz, intensity in zip(spectrum['m/z array'], spectrum['intensity array']):
+    for mz, intensity in zip(mz_array, intensity_array):
         # If the charge is outside of the max bin specified or if it's too large 
         # relative to the spectra itself, skip it
-        if mz > max_bin or mz > spectrum['params']['pepmass'][0]:
+        if mz > max_bin or mz > parent_mass:
             continue
         # Figure out what the index of the bin should be
         target_bin = math.floor((mz - min_bin)/bin_size)
