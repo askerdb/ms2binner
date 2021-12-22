@@ -174,6 +174,10 @@ def bin_sql(df, output_file = None, min_bin = 50, max_bin = 850, bin_size = 0.01
     X = X.tocsr()
     X_orig_shape = X.shape
 
+    # Normalize the matrix, making each bin relative to its max value
+    for idx in range(0, X.shape[0]):
+        X[idx] = X[idx]/X[idx].toarray().max()
+
     # Filter out rows summing to zero if specified
     print("\nSummary:") if verbose else None
     if remove_zero_sum_rows:
